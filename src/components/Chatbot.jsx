@@ -1,0 +1,34 @@
+import {useState,useRef,useEffect} from "react";import {Link} from "react-router-dom";import {MessageCircle,X,Send} from "lucide-react";
+import {PROPERTIES} from "../data/properties";import {formatPrice} from "../services/propertyApi";
+// Optional: set VITE_CHAT_API_URL to a backend route (POST {messages} -> {reply}) that calls your LLM. Never put an API key in the frontend.
+const API=import.meta.env.VITE_CHAT_API_URL;
+const amount=t=>{const m=t.match(/(\d+(?:\.\d+)?)\s*(cr|crore|crores|l|lac|lakh|lakhs)\b/);return m?parseFloat(m[1])*(m[2][0]==="c"?1e7:1e5):null};
+function answer(q){const t=q.toLowerCase(),amt=amount(t),city=["mumbai","delhi","bengaluru","bangalore"].find(c=>t.includes(c)),type=["penthouse","villa","apartment"].find(c=>t.includes(c)),bd=(t.match(/(\d)\s*(bhk|bed|bd)/)||[])[1];
+ if(/^(hi|hello|hey|namaste)\b/.test(t))return{t:"Hello! I can help you find a residence by city, type or budget, estimate an EMI, or arrange a visit. What are you looking for?"};
+ if(/emi|loan|mortgage/.test(t)){if(!amt)return{t:"Tell me the property price (e.g. “EMI for 5 Cr”) and I’ll estimate it, assuming an 80% loan at 8.5% over 20 years."};const P=amt*.8,r=.085/12,n=240,e=P*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1);return{t:`For a ${formatPrice(amt)} home with an 80% loan (${formatPrice(P)}) at 8.5% over 20 years, the EMI is about ₹${Math.round(e).toLocaleString("en-IN")}/month. This is indicative — actual rates depend on your lender.`}}
+ if(/stamp|registration|tax|gst/.test(t))return{t:"Stamp duty and registration typically add roughly 5–7% of the property value in these states, varying by state, buyer and property type. An advisor can give you an exact figure for any residence."};
+ if(/rera/.test(t))return{t:"RERA is the Real Estate (Regulation and Development) Act. Always check a project’s RERA registration number, approved plans and possession timeline. Our advisors share all of these before you commit."};
+ if(/invest|rental|yield|roi/.test(t))return{t:"Prime-location homes in Mumbai, Delhi and Bengaluru have historically held value well, with rental yields usually modest. I’d suggest speaking to an advisor about your horizon and budget.",cta:true};
+ if(/visit|tour|book|call|contact|advisor|agent|meet|talk/.test(t))return{t:"Happy to arrange that. Share your details in the enquiry form and an advisor will reach out within 24 hours.",cta:true};
+ if(city||type||amt||bd||/propert|home|residen|show|list|available/.test(t)){let r=PROPERTIES.filter(p=>(!city||p.city.toLowerCase().includes(city.replace("bangalore","bengaluru"))||p.city.toLowerCase()===city)&&(!type||p.propertyType.toLowerCase()===type)&&(!bd||p.bedrooms>=+bd)&&(!amt||p.price<=amt*(/under|below|within|max|less|upto|up to/.test(t)?1:1.15)));
+  return r.length?{t:`Here ${r.length>1?"are "+r.length+" residences":"is a residence"} that match:`,props:r}:{t:"I couldn’t find an exact match. Try a larger budget or another city — or ask me to show all properties.",props:/all|show|list/.test(t)?PROPERTIES:[]}}
+ return{t:"I can help with: finding properties by city, type or budget · EMI estimates · stamp duty & RERA basics · booking a visit. What would you like to know?"}}
+const CHIPS=["Show all properties","Villas in Bengaluru","Homes under 5 Cr","EMI for 5 Cr","Book a visit"];
+export default function Chatbot(){
+ const[open,setO]=useState(false),[busy,setB]=useState(false),[txt,setTxt]=useState(""),box=useRef(),[m,setM]=useState([{r:"bot",t:"Hello, I’m Aura’s property assistant. Ask me about residences, budgets, locations, EMIs or booking a visit."}]);
+ useEffect(()=>{if(box.current)box.current.scrollTop=box.current.scrollHeight},[m,open,busy]);
+ const send=async v=>{v=v.trim();if(!v||busy)return;const h=[...m,{r:"user",t:v}];setM(h);setTxt("");setB(true);let a;
+  if(API){try{const r=await fetch(API,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({messages:h.map(x=>({role:x.r==="bot"?"assistant":"user",content:x.t}))})});if(!r.ok)throw 0;a={t:(await r.json()).reply}}catch{}}
+  if(!a){await new Promise(r=>setTimeout(r,650));a=answer(v)}
+  setM([...h,{r:"bot",...a}]);setB(false)};
+ return <>
+  <button aria-label={open?"Close assistant":"Open property assistant"} onClick={()=>setO(!open)} className="fixed bottom-6 right-6 z-[90] w-14 h-14 rounded-full bg-brass text-ink grid place-items-center shadow-2xl hover:scale-105 transition">{open?<X/>:<MessageCircle/>}</button>
+  <div role="dialog" aria-label="Property assistant" aria-hidden={!open} className={`fixed bottom-24 right-4 md:right-6 z-[90] w-[min(92vw,400px)] h-[min(75vh,600px)] bg-coal border border-white/10 shadow-2xl flex flex-col transition-all duration-500 origin-bottom-right ${open?"opacity-100 scale-100":"opacity-0 scale-95 pointer-events-none"}`}>
+   <div className="px-5 py-4 border-b border-white/10 flex items-center gap-3"><div className="w-9 h-9 rounded-full bg-brass text-ink grid place-items-center h-display text-xl">A</div><div><p className="text-sm font-semibold">Aura Assistant</p><p className="eyebrow !text-[.58rem]">Real estate concierge</p></div></div>
+   <div ref={box} className="flex-1 overflow-y-auto p-5 space-y-4 text-sm">
+    {m.map((x,i)=><div key={i} className={x.r==="user"?"text-right":""}><div className={`inline-block max-w-[88%] px-4 py-3 text-left leading-relaxed ${x.r==="user"?"bg-brass text-ink":"bg-ink text-stone"}`}>{x.t}</div>
+     {x.props?.map(p=><Link key={p.id} to={`/properties/${p.id}`} onClick={()=>setO(false)} className="mt-2 flex gap-3 bg-ink border border-white/10 hover:border-brass transition max-w-[88%]"><img src={p.images[0]} alt="" className="w-20 h-20 object-cover"/><div className="py-2 pr-2"><p className="font-semibold">{p.title}</p><p className="text-xs text-stone/70">{p.city} · {p.bedrooms} bd · {formatPrice(p.price)}</p></div></Link>)}
+     {x.cta&&<a href="/#contact" onClick={()=>setO(false)} className="mt-2 inline-block bg-ivory text-ink px-4 py-2 text-[.65rem] tracking-[.2em] uppercase hover:bg-brass transition">Open enquiry form</a>}</div>)}
+    {busy&&<div className="inline-block bg-ink px-4 py-3 text-stone/60 animate-pulse">Typing…</div>}
+    {m.length<2&&<div className="flex flex-wrap gap-2 pt-2">{CHIPS.map(c=><button key={c} onClick={()=>send(c)} className="border border-white/20 px-3 py-2 text-xs hover:border-brass hover:text-brass transition">{c}</button>)}</div>}</div>
+   <form onSubmit={e=>{e.preventDefault();send(txt)}} className="flex border-t border-white/10"><label htmlFor="chat" className="sr-only">Message</label><input id="chat" value={txt} onChange={e=>setTxt(e.target.value)} placeholder="Ask about homes, budgets, EMI…" className="flex-1 bg-transparent px-5 py-4 text-sm outline-none placeholder:text-stone/50"/><button aria-label="Send" className="px-5 text-brass hover:text-ivory"><Send size={18}/></button></form></div></>}
