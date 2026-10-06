@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 
-// Same order as the sections appear on the page
 const L = [["Home", "top"], ["Properties", "properties"], ["About", "about"], ["Locations", "locations"], ["Contact", "contact"]];
 
 export default function Navbar() {
@@ -14,7 +13,6 @@ export default function Navbar() {
   useEffect(() => {
     const f = () => {
       setS(scrollY > 80);
-      // the active section is the one whose top is closest above the 35% line
       let c = "top", best = -Infinity;
       for (const [, id] of L) {
         const el = document.getElementById(id);
@@ -44,7 +42,7 @@ export default function Navbar() {
   return (
     <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-700 ${s || o ? "bg-ink/85 backdrop-blur-md py-4 border-b border-white/10" : "py-7"}`}>
       <nav aria-label="Main" className="mx-auto max-w-[1500px] px-6 md:px-12 flex items-center justify-between">
-        <Link to="/" onClick={() => home && scrollTo({ top: 0, behavior: "smooth" })} className="h-display text-2xl tracking-[.25em]">
+        <Link to="/" onClick={() => home && scrollTo({ top: 0, behavior: "smooth" })} className="h-display text-2xl md:text-3xl tracking-[.3em] font-medium text-ivory">
           AURA<span className="text-brass">.</span>
         </Link>
         <ul className="hidden md:flex gap-10 text-[.72rem] tracking-[.2em] uppercase">
