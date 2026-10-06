@@ -1,11 +1,67 @@
-import {useParams,Link} from "react-router-dom";import {useAsync} from "../hooks";import {getProperty,formatPrice} from "../services/propertyApi";import {ContactForm} from "../components/Sections";
-export default function PropertyDetails(){const{id}=useParams();const s=useAsync(()=>getProperty(id),[id]);
- if(s.loading)return <main className="min-h-screen grid place-items-center" aria-busy="true"><p className="eyebrow animate-pulse">Loading residence…</p></main>;
- if(s.error)return <main className="min-h-screen grid place-items-center text-center" role="alert"><div><h1 className="h-display text-5xl">Residence not found</h1><Link to="/properties" className="underline mt-6 inline-block">Back to properties</Link></div></main>;
- const p=s.data;document.title=`${p.title} — AURA ESTATE`;
- return <main><div className="relative h-[85vh]"><img src={p.images[0]} alt={p.title} fetchpriority="high" className="absolute inset-0 w-full h-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/50"/><div className="absolute bottom-12 left-6 md:left-12"><p className="eyebrow">{p.propertyType} · {p.location}, {p.city}</p><h1 className="h-display text-[clamp(3rem,9vw,9rem)] mt-3">{p.title}</h1></div></div>
- <div className="mx-auto max-w-[1500px] px-6 md:px-12 py-24 grid md:grid-cols-12 gap-16"><div className="md:col-span-7"><p className="h-display text-4xl italic mb-8">{formatPrice(p.price)}</p><p className="text-lg text-stone/80 leading-relaxed">{p.description}</p>
- <dl className="grid grid-cols-3 gap-6 mt-12 border-y border-white/10 py-8">{[["Bedrooms",p.bedrooms],["Area",`${p.area.toLocaleString()} sq ft`],["Status",p.status.replace("-"," ")]].map(([k,v])=><div key={k}><dt className="eyebrow">{k}</dt><dd className="h-display text-3xl mt-2 capitalize">{v}</dd></div>)}</dl>
- <h2 className="eyebrow mt-14 mb-6">Amenities</h2><ul className="grid grid-cols-2 gap-3 text-stone/80">{p.amenities.map(a=><li key={a} className="border-b border-white/10 pb-3">{a}</li>)}</ul></div>
- <div className="md:col-span-5 grid gap-6">{p.images.slice(1).map((im,i)=><img key={i} loading="lazy" src={im} alt={`${p.title} gallery ${i+1}`} className="w-full aspect-[4/3] object-cover"/>)}</div></div>
- <section className="bg-coal py-28"><div className="mx-auto max-w-[1500px] px-6 md:px-12"><h2 className="h-display text-5xl mb-12">Enquire about this residence</h2><ContactForm defaultInterest={p.title}/></div></section></main>}
+import { useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
+import { useAsync } from "../hooks";
+import { getProperty, formatPrice } from "../services/propertyApi";
+import { ContactForm } from "../components/Sections";
+
+export default function PropertyDetails() {
+  const { id } = useParams();
+  const s = useAsync(() => getProperty(id), [id]);
+
+  useEffect(() => {
+    if (s.data) document.title = `${s.data.title} | Aura Estate`;
+    return () => { document.title = "Aura Estate | Premium homes in Mumbai, Delhi & Bengaluru"; };
+  }, [s.data]);
+
+  if (s.loading)
+    return <main className="min-h-screen grid place-items-center" aria-busy="true"><p className="eyebrow animate-pulse">Loading…</p></main>;
+  if (s.error)
+    return (
+      <main className="min-h-screen grid place-items-center text-center" role="alert">
+        <div>
+          <h1 className="h-display text-5xl">Home not found</h1>
+          <Link to="/properties" className="underline mt-6 inline-block">Back to properties</Link>
+        </div>
+      </main>
+    );
+
+  const p = s.data;
+  return (
+    <main>
+      <div className="relative h-[85vh]">
+        <img src={p.images[0]} alt={p.title} fetchpriority="high" className="absolute inset-0 w-full h-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-t from-ink via-transparent to-ink/50" />
+        <div className="absolute bottom-12 left-6 md:left-12">
+          <p className="eyebrow">{p.propertyType} · {p.location}, {p.city}</p>
+          <h1 className="h-display text-[clamp(3rem,9vw,9rem)] mt-3">{p.title}</h1>
+        </div>
+      </div>
+      <div className="mx-auto max-w-[1500px] px-6 md:px-12 py-24 grid md:grid-cols-12 gap-16">
+        <div className="md:col-span-7">
+          <p className="h-display text-4xl italic mb-8">{formatPrice(p.price)}</p>
+          <p className="text-lg text-stone/80 leading-relaxed">{p.description}</p>
+          <dl className="grid grid-cols-3 gap-6 mt-12 border-y border-white/10 py-8">
+            {[["Bedrooms", p.bedrooms], ["Area", `${p.area.toLocaleString()} sq ft`], ["Status", p.status.replace("-", " ")]].map(([k, v]) => (
+              <div key={k}><dt className="eyebrow">{k}</dt><dd className="h-display text-3xl mt-2 capitalize">{v}</dd></div>
+            ))}
+          </dl>
+          <h2 className="eyebrow mt-14 mb-6">Amenities</h2>
+          <ul className="grid grid-cols-2 gap-3 text-stone/80">
+            {p.amenities.map((a) => <li key={a} className="border-b border-white/10 pb-3">{a}</li>)}
+          </ul>
+        </div>
+        <div className="md:col-span-5 grid gap-6">
+          {p.images.slice(1).map((im, i) => (
+            <img key={i} loading="lazy" src={im} alt={`${p.title} gallery ${i + 1}`} className="w-full aspect-[4/3] object-cover" />
+          ))}
+        </div>
+      </div>
+      <section className="bg-coal py-28">
+        <div className="mx-auto max-w-[1500px] px-6 md:px-12">
+          <h2 className="h-display text-5xl mb-12">Enquire about this home</h2>
+          <ContactForm defaultInterest={p.title} />
+        </div>
+      </section>
+    </main>
+  );
+}

@@ -5,14 +5,7 @@ import image4 from "../images/image4.png";
 
 const base = {
   status: "available",
-  amenities: [
-    "Private lift",
-    "Concierge",
-    "Rooftop terrace",
-    "Wellness spa",
-    "Smart home",
-    "Secure parking"
-  ]
+  amenities: ["Private lift", "Concierge", "Rooftop terrace", "Wellness spa", "Smart home", "Secure parking"],
 };
 
 export const PROPERTIES = [
@@ -26,13 +19,11 @@ export const PROPERTIES = [
     bedrooms: 4,
     area: 6200,
     featured: true,
-    description:
-      "A sky-level residence of stone, oak and uninterrupted sea horizon, designed around a single, sweeping terrace.",
+    description: "Top-floor home with open sea views and one wide terrace. Stone and oak throughout.",
     images: [image1],
     video: null,
-    ...base
+    ...base,
   },
-
   {
     id: "oak-court",
     title: "Oak Court Residence",
@@ -43,13 +34,11 @@ export const PROPERTIES = [
     bedrooms: 5,
     area: 8400,
     featured: true,
-    description:
-      "A courtyard villa wrapped in shaded colonnades and mature oaks, quiet at the heart of the capital.",
+    description: "Courtyard villa with shaded walkways and old oak trees, in the heart of Delhi.",
     images: [image2],
     video: null,
-    ...base
+    ...base,
   },
-
   {
     id: "verde-house",
     title: "Verde House",
@@ -60,13 +49,11 @@ export const PROPERTIES = [
     bedrooms: 4,
     area: 5100,
     featured: true,
-    description:
-      "Terraced living stepping into a private forest garden, built in raw concrete and warm timber.",
+    description: "Terraced home that opens onto a private forest garden. Raw concrete and warm timber.",
     images: [image3],
     video: null,
-    ...base
+    ...base,
   },
-
   {
     id: "harbour-lofts",
     title: "Harbour Lofts",
@@ -77,11 +64,10 @@ export const PROPERTIES = [
     bedrooms: 3,
     area: 2800,
     featured: false,
-    description:
-      "Double-height lofts with industrial-grade glazing and a view of the bay.",
+    description: "Double-height lofts with large windows and a view of the bay.",
     images: [image4],
     video: null,
     ...base,
-    status: "coming-soon"
-  }
+    status: "coming-soon",
+  },
 ];
