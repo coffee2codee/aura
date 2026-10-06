@@ -1,8 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { frames, startFrames } from "../heroFrames";
 
-// Shows real progress while the hero video is prepared in the background.
-// Never blocks for more than a few seconds, even on a slow connection.
 const MAX_WAIT = 9000;
 const MIN_SHOW = 1400;
 
@@ -15,7 +13,6 @@ export default function Loader({ onDone }) {
     startFrames();
     const t0 = performance.now();
     let shown = 0, raf;
-
     const tick = (now) => {
       const age = now - t0;
       const real = frames.skipped || frames.failed || frames.done
@@ -27,7 +24,6 @@ export default function Loader({ onDone }) {
       shown += (target - shown) * 0.12;
       if (target - shown < 0.002) shown = target;
       setP(shown * 100);
-
       if (shown >= 1 && !done.current) {
         done.current = true;
         setTimeout(() => setOut(true), 250);
@@ -47,7 +43,7 @@ export default function Loader({ onDone }) {
       className={`fixed inset-0 z-[100] bg-ink grid place-items-center transition-[clip-path] duration-[1200ms] ease-[cubic-bezier(.7,0,.2,1)] ${out ? "[clip-path:inset(0_0_100%_0)]" : "[clip-path:inset(0)]"}`}
     >
       <div className="text-center">
-        <div className="h-display text-5xl md:text-7xl tracking-[.18em]">AURA</div>
+        <div className="h-display text-5xl md:text-7xl tracking-[.3em] font-medium text-ivory">AURA</div>
         <div className="eyebrow mt-3">Estate</div>
         <div className="mt-10 mx-auto w-48 h-px bg-white/15">
           <div className="h-px bg-brass" style={{ width: `${p}%` }} />
